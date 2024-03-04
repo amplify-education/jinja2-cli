@@ -10,15 +10,37 @@ jinja2-cli
   $ curl -s http://httpbin.org/ip | jinja2 helloip.tmpl
   $ curl -s http://httpbin.org/ip | jinja2 helloip.tmpl > helloip.html
 """
+import os
+import re
 
 from setuptools import find_packages, setup
 
 install_requires = ["jinja2"]
 tests_requires = ["pytest", "flake8"]
 
+VERSION_REGEX = re.compile(
+    r"""
+    ^__version__\s=\s
+    ['"](?P<version>.*?)['"]
+    """,
+    re.MULTILINE | re.VERBOSE,
+)
+VERSION_FILE = os.path.join("jinja2cli", "__init__.py")
+
+
+def get_version():
+    """Reads the version from the package"""
+    with open(VERSION_FILE, encoding="utf8") as handle:
+        lines = handle.read()
+        result = VERSION_REGEX.search(lines)
+        if result:
+            return result.groupdict()["version"]
+        raise ValueError("Unable to determine __version__")
+
+
 setup(
     name="jinja2-cli",
-    version="0.8.3",
+    version=get_version(),
     author="Matt Robenolt",
     author_email="matt@ydekproductions.com",
     url="https://github.com/mattrobenolt/jinja2-cli",
